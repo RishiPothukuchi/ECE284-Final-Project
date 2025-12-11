@@ -2,14 +2,14 @@
 import torch
 import torch.nn as nn
 import math
-from models.quant_layer_part_2 import *
+from models.quant_layer import *
 
 
 
 cfg = {
     'VGG11': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
     'VGG13': [64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
-    'VGG16_quant': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 16, 512, 'M', 512, 512, 512, 'M'],
+    'VGG16_quant': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 8, 512, 'M', 512, 512, 512, 'M'],
     'VGG16': ['F', 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'],
     'VGG19': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M'],
 }
@@ -36,19 +36,19 @@ class VGG_quant(nn.Module):
             elif x == 'F':  # This is for the 1st layer
                 layers += [nn.Conv2d(in_channels, 64, kernel_size=3, padding=1, bias=False),
                            nn.BatchNorm2d(64),
-                           nn.ReLU(inplace=True)]
+                           nn.LeakyReLU(negative_slope=0.05, inplace=True)]
                 in_channels = 64
-            elif x == 16: 
-                layers += [QuantConv2d(in_channels, 16, kernel_size=3, padding=1),
+            elif x == 8: 
+                layers += [QuantConv2d(in_channels, 8, kernel_size=3, padding=1),
                            nn.BatchNorm2d(x),
-                           nn.ReLU(inplace=True),
-                           QuantConv2d(16, 16, kernel_size=3, padding=1),
-                           nn.ReLU(inplace=True)]
-                in_channels = 16
+                           nn.LeakyReLU(negative_slope=0.05, inplace=True),
+                           QuantConv2d(8, 8, kernel_size=3, padding=1),
+                           nn.LeakyReLU(negative_slope=0.05, inplace=True)]
+                in_channels = 8
             else:
                 layers += [QuantConv2d(in_channels, x, kernel_size=3, padding=1),
                            nn.BatchNorm2d(x),
-                           nn.ReLU(inplace=True)]
+                           nn.LeakyReLU(negative_slope=0.05, inplace=True)]
                 in_channels = x
         layers += [nn.AvgPool2d(kernel_size=1, stride=1)]
         return nn.Sequential(*layers)
@@ -59,6 +59,6 @@ class VGG_quant(nn.Module):
                 m.show_params()
     
 
-def VGG16_quant(**kwargs):
+def VGG16_quant_LeakyReLU(**kwargs):
     model = VGG_quant(vgg_name = 'VGG16_quant', **kwargs)
     return model

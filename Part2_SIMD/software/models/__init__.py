@@ -1,5 +1,2 @@
-from .resnet import *
-from .vgg import *
-from .vgg_quant import *
-from .resnet_quant import *
-from .cifar import *
+from .quant_layer_part2_2bit import *
+from .vgg_quant_part2_2bit import *

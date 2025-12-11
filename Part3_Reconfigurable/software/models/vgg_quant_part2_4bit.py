@@ -2,22 +2,22 @@
 import torch
 import torch.nn as nn
 import math
-from models.quant_layer_part_2 import *
+from models.quant_layer import *
 
 
 
 cfg = {
     'VGG11': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
     'VGG13': [64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
-    'VGG16_quant': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 16, 512, 'M', 512, 512, 512, 'M'],
+    'VGG16_quant_part2_4bit': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 16, 512, 'M', 512, 512, 512, 'M'],
     'VGG16': ['F', 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'],
     'VGG19': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M'],
 }
 
 
-class VGG_quant(nn.Module):
+class VGG16_quant_part2_4(nn.Module):
     def __init__(self, vgg_name):
-        super(VGG_quant, self).__init__()
+        super(VGG16_quant_part2_4, self).__init__()
         self.features = self._make_layers(cfg[vgg_name])
         self.classifier = nn.Linear(512, 10)
 
@@ -38,7 +38,7 @@ class VGG_quant(nn.Module):
                            nn.BatchNorm2d(64),
                            nn.ReLU(inplace=True)]
                 in_channels = 64
-            elif x == 16: 
+            elif x == 16:
                 layers += [QuantConv2d(in_channels, 16, kernel_size=3, padding=1),
                            nn.BatchNorm2d(x),
                            nn.ReLU(inplace=True),
@@ -59,6 +59,6 @@ class VGG_quant(nn.Module):
                 m.show_params()
     
 
-def VGG16_quant(**kwargs):
-    model = VGG_quant(vgg_name = 'VGG16_quant', **kwargs)
+def VGG16_quant_part2_4bit(**kwargs):
+    model = VGG16_quant_part2_4(vgg_name = 'VGG16_quant_part2_4bit', **kwargs)
     return model

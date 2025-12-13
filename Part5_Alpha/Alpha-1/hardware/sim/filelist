@@ -1,3 +1,5 @@
+core_tb.v
+
 ../verilog/core.v
 ../verilog/corelet.v
 
@@ -17,4 +19,4 @@
 
 ../verilog/sram_32b_w2048.v
 
-../verilog/sfu.v
+../verilog/sfu_leaky.v

@@ -232,7 +232,7 @@ initial begin
               rando_val = -rando_val; 
             end
 
-            if (random_val < SPARSITY) begin
+            if (rando_val < SPARSITY) begin
               pruned_wt[nibble_idx*4 +: 4] = 4'b0000;
               zero_ct = zero_ct + 1;
             end
@@ -266,7 +266,7 @@ initial begin
     end
     
     if (PRUNING_MODE != 0) begin
-      $display("kij=%0d: Zeroed %0d out of %0d weights (%.1f%%)", kij, zero_count, col*8, (zero_count*100.0)/(col*8));
+      $display("kij=%0d: Zeroed %0d out of %0d weights (%.1f%%)", kij, zero_ct, col*8, (zero_ct*100.0)/(col*8));
     end
     
     #0.5 clk = 1'b0;  WEN_xmem = 1;  CEN_xmem = 1; A_xmem = 0;

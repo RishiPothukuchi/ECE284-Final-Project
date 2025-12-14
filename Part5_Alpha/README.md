@@ -7,7 +7,7 @@
 **Description:** Implementation of Leaky ReLU activation function in hardware with corresponding software training. No change in how this section is ran.
 
 **Key Hardware Modification:**
-- `verilog/sfu_leaky.v` - Modified SFU module implementing Leaky ReLU instead of standard ReLU
+- `verilog/sfu.v` - Modified SFU module implementing Leaky ReLU instead of standard ReLU
 
 ---
 
@@ -26,7 +26,7 @@
 **Description:** Implementation of activation-aware pruning with hardware testbench for validation. No changes in how this section is ran.
 
 **Key Hardware File:**
-- `sim/core_tb_pruning.v` - Testbench with pruning-specific validation
+- `sim/core_tb.v` - Testbench with pruning-specific validation
 
 ---
 

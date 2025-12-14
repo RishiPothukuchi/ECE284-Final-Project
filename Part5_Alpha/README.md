@@ -42,7 +42,7 @@
 
 | Alpha | Type | Hardware | Software | Key Feature |
 |-------|------|----------|----------|-------------|
-| Alpha-1 | Hardware + Software | (sfu_leaky.v) | (Leaky_ReLU.ipynb) | Leaky ReLU activation |
+| Alpha-1 | Hardware + Software | (sfu.v) | (Leaky_ReLU.ipynb) | Leaky ReLU activation |
 | Alpha-2 | Software-only | - | (Cosine_Annealing_LR_Scheduler.ipynb) | Cosine Annealing LR |
-| Alpha-3 | Hardware + Software | (core_tb_pruning.v) | (Activation_Aware_Pruning.ipynb) | Activation-aware pruning |
+| Alpha-3 | Hardware + Software | (core_tb.v) | (Activation_Aware_Pruning.ipynb) | Activation-aware pruning |
 | Alpha-4 | Software-only | - | (Add_Layers.ipynb) | Gradual channel squeeze |

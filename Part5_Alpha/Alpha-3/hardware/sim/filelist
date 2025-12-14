@@ -1,4 +1,4 @@
-core_tb_pruning.v
+core_tb.v
 
 ../verilog/core.v
 ../verilog/corelet.v

@@ -9,20 +9,22 @@ module corelet #(
 ) (
     input clk,
     input reset,
-    input [33:0] inst,                  // bundled instructions from testbench
+    input [34:0] inst,                  // bundled instructions from testbench
     input [bw*row-1:0] D_xmem,          // write data from testbench into xmem
-   
-    input [psum_bw*col-1:0] pmem_q,	//Data read from PMEM (For bring to SFU)
-    output [psum_bw*col-1:0] ofifo_bus,	//Data to write back to PMEM
-
+    input [psum_bw*col-1:0] D_pmem,     // read PSUMs from PMEM to SFU
     output [psum_bw*col-1:0] sfp_out,   // accumulate + ReLU result
-    output ofifo_valid
+    output ofifo_valid,
+
+
+
+
+    output [psum_bw*col-1:0] pmem_din 
 );
 
     // extract individual instructions
+    wire pmem_rd = inst[34];
+    wire bypass = inst[34];
     wire acc = inst[33];        // SFU accumulator (1 = continue acc, 0 = ReLU + clear acc)
-    // inst[32:20] : pmem controls (core.v)
-    // inst[19:7] : xmem controls (core.v)
     wire ofifo_rd = inst[6];    // read-enable (1 = output next PSUM to SFU)
     wire ififo_wr = inst[5];
     wire ififo_rd = inst[4];
@@ -97,6 +99,9 @@ module corelet #(
     //  - creates output FIFO, writes when MAC says outputs are valid
     //  - buffers psum vectors (fed into SFU at controlled pace)
     // -------------------------------------------------------------------------
+   
+   	assign pmem_din = ofifo_out;	
+
     ofifo #(
         .col (col),
         .bw (psum_bw)
@@ -112,15 +117,11 @@ module corelet #(
         .o_valid (ofifo_valid)
     );
 
-	assign ofifo_bus = ofifo_out;
-
     // --------------------------------------------------------------------------------
     // SFU
     // --------------------------------------------------------------------------------
     //  - special function unit: receives PSUMs from OFIFO, performs accumulate + ReLU
     // --------------------------------------------------------------------------------
-    
-    
 
     sfu #(
         .psum_bw (psum_bw),
@@ -128,10 +129,10 @@ module corelet #(
     ) sfu_inst (
         .clk (clk),
         .reset (reset),
+        .bypass (bypass),
         .acc (acc),
-        .psum_in (pmem_q),
+        .psum_in (D_pmem),
         .sfp_out (sfp_out)
     );
-
 
 endmodule

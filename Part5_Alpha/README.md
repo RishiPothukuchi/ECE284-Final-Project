@@ -21,7 +21,7 @@
 
 ## Alpha-3: Activation-Aware Pruning
 
-**Type:** Hardware testbench + Software training
+**Type:** Software training + Hardware testbench
 
 **Description:** Implementation of activation-aware pruning with hardware testbench for validation. No changes in how this section is ran.
 

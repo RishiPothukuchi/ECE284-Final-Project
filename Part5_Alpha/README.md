@@ -2,7 +2,7 @@
 
 ## Alpha-1: Leaky ReLU
 
-**Type:** Hardware modification + Software training
+**Type:** Software training + Hardware modification
 
 **Description:** Implementation of Leaky ReLU activation function in hardware with corresponding software training. No change in how this section is ran.
 

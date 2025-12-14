@@ -7,7 +7,7 @@
 **Description:** Implementation of Leaky ReLU activation function in hardware with corresponding software training. No change in how this section is ran.
 
 **Key Hardware Modification:**
-- `verilog/sfu_leaky.v` - Modified SFU module implementing Leaky ReLU instead of standard ReLU
+- `verilog/sfu.v` - Modified SFU module implementing Leaky ReLU instead of standard ReLU
 
 ---
 
@@ -26,7 +26,7 @@
 **Description:** Implementation of activation-aware pruning with hardware testbench for validation. No changes in how this section is ran.
 
 **Key Hardware File:**
-- `sim/core_tb_pruning.v` - Testbench with pruning-specific validation
+- `sim/core_tb.v` - Testbench with pruning-specific validation
 
 ---
 
@@ -42,7 +42,7 @@
 
 | Alpha | Type | Hardware | Software | Key Feature |
 |-------|------|----------|----------|-------------|
-| Alpha-1 | Hardware + Software | (sfu_leaky.v) | (Leaky_ReLU.ipynb) | Leaky ReLU activation |
+| Alpha-1 | Hardware + Software | (sfu.v) | (Leaky_ReLU.ipynb) | Leaky ReLU activation |
 | Alpha-2 | Software-only | - | (Cosine_Annealing_LR_Scheduler.ipynb) | Cosine Annealing LR |
-| Alpha-3 | Hardware + Software | (core_tb_pruning.v) | (Activation_Aware_Pruning.ipynb) | Activation-aware pruning |
+| Alpha-3 | Hardware + Software | (core_tb.v) | (Activation_Aware_Pruning.ipynb) | Activation-aware pruning |
 | Alpha-4 | Software-only | - | (Add_Layers.ipynb) | Gradual channel squeeze |

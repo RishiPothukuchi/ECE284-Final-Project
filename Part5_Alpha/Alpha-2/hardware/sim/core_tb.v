@@ -54,7 +54,7 @@ reg l0_wr;
 reg execute;
 reg load;
 reg [8*30:1] stringvar;
-reg [8*30:1] w_file_name;
+reg [8*50:1] w_file_name;
 wire ofifo_valid;
 wire [col*psum_bw-1:0] sfp_out;
 
@@ -109,7 +109,11 @@ initial begin
   $dumpfile("core_tb.vcd");
   $dumpvars(0,core_tb);
 
-  x_file = $fopen("activation_tile0.txt", "r");
+  x_file = $fopen("../datafiles/activation_tile0.txt", "r");
+  if (x_file == 0) begin
+    $display("ERROR: failed to open file: ../datafiles/activation_tile0.txt");
+    $finish;
+  end
   // Following three lines are to remove the first three comment lines of the file
   x_scan_file = $fscanf(x_file,"%s", captured_data);
   x_scan_file = $fscanf(x_file,"%s", captured_data);
@@ -147,19 +151,23 @@ initial begin
   for (kij=0; kij<9; kij=kij+1) begin  // kij loop
 
     case(kij)
-     0: w_file_name = "weight_itile0_otile0_kij0.txt";
-     1: w_file_name = "weight_itile0_otile0_kij1.txt";
-     2: w_file_name = "weight_itile0_otile0_kij2.txt";
-     3: w_file_name = "weight_itile0_otile0_kij3.txt";
-     4: w_file_name = "weight_itile0_otile0_kij4.txt";
-     5: w_file_name = "weight_itile0_otile0_kij5.txt";
-     6: w_file_name = "weight_itile0_otile0_kij6.txt";
-     7: w_file_name = "weight_itile0_otile0_kij7.txt";
-     8: w_file_name = "weight_itile0_otile0_kij8.txt";
+     0: w_file_name = "../datafiles/weight_itile0_otile0_kij0.txt";
+     1: w_file_name = "../datafiles/weight_itile0_otile0_kij1.txt";
+     2: w_file_name = "../datafiles/weight_itile0_otile0_kij2.txt";
+     3: w_file_name = "../datafiles/weight_itile0_otile0_kij3.txt";
+     4: w_file_name = "../datafiles/weight_itile0_otile0_kij4.txt";
+     5: w_file_name = "../datafiles/weight_itile0_otile0_kij5.txt";
+     6: w_file_name = "../datafiles/weight_itile0_otile0_kij6.txt";
+     7: w_file_name = "../datafiles/weight_itile0_otile0_kij7.txt";
+     8: w_file_name = "../datafiles/weight_itile0_otile0_kij8.txt";
     endcase
     
 
     w_file = $fopen(w_file_name, "r");
+    if (w_file == 0) begin
+      $display("ERROR: failed to open file: %s", w_file_name);
+      $finish;
+    end
     // Following three lines are to remove the first three comment lines of the file
     w_scan_file = $fscanf(w_file,"%s", captured_data);
     w_scan_file = $fscanf(w_file,"%s", captured_data);
@@ -378,9 +386,17 @@ initial begin
 
 
   ////////// Accumulation /////////
-  out_file = $fopen("out.txt", "r");  
+  out_file = $fopen("../datafiles/out.txt", "r");  
+  if (out_file == 0) begin
+    $display("ERROR: failed to open ../datafiles/out.txt");
+    $finish;
+  end
 
-  acc_file = $fopen("acc.txt", "r");
+  acc_file = $fopen("../datafiles/acc.txt", "r");
+  if (acc_file == 0) begin
+    $display("ERROR: failed to open ../datafiles/acc.txt");
+    $finish;
+  end
 
 
   // Following three lines are to remove the first three comment lines of the file

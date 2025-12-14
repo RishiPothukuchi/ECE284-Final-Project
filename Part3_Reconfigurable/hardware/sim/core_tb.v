@@ -56,9 +56,13 @@ reg l0_wr;
 reg execute;
 reg load;
 reg [8*30:1] stringvar;
-reg [8*30:1] w_file_name;
+reg [8*50:1] w_file_name;
 wire ofifo_valid;
 wire [col*psum_bw-1:0] sfp_out;
+
+
+
+
 
 integer x_file, x_scan_file ; // file_handler
 integer w_file, w_scan_file ; // file_handler
@@ -85,13 +89,18 @@ assign inst_q[1]   = execute_q;
 assign inst_q[0]   = load_q; 
 
 
+
+
+
+
 core  #(.bw(bw), .col(col), .row(row)) core_instance (
 	.clk(clk), 
 	.inst(inst_q),
 	.ofifo_valid(ofifo_valid),
         .D_xmem(D_xmem_q), 
-        .sfp_out(sfp_out), 
+        .sfp_out(sfp_out),
 	.reset(reset)); 
+
 
 
 initial begin 
@@ -112,7 +121,11 @@ initial begin
   $dumpfile("core_tb.vcd");
   $dumpvars(0,core_tb);
 
-  x_file = $fopen("activation_tile0.txt", "r");
+  x_file = $fopen("../datafiles/activation_tile0.txt", "r");
+  if (x_file == 0) begin
+    $display("ERROR: failed to open file: ../datafiles/activation_tile0.txt");
+    $finish;
+  end
   // Following three lines are to remove the first three comment lines of the file
   x_scan_file = $fscanf(x_file,"%s", captured_data);
   x_scan_file = $fscanf(x_file,"%s", captured_data);
@@ -150,19 +163,23 @@ initial begin
   for (kij=0; kij<9; kij=kij+1) begin  // kij loop
 
     case(kij)
-     0: w_file_name = "weight_itile0_otile0_kij0.txt";
-     1: w_file_name = "weight_itile0_otile0_kij1.txt";
-     2: w_file_name = "weight_itile0_otile0_kij2.txt";
-     3: w_file_name = "weight_itile0_otile0_kij3.txt";
-     4: w_file_name = "weight_itile0_otile0_kij4.txt";
-     5: w_file_name = "weight_itile0_otile0_kij5.txt";
-     6: w_file_name = "weight_itile0_otile0_kij6.txt";
-     7: w_file_name = "weight_itile0_otile0_kij7.txt";
-     8: w_file_name = "weight_itile0_otile0_kij8.txt";
+     0: w_file_name = "../datafiles/weight_itile0_otile0_kij0.txt";
+     1: w_file_name = "../datafiles/weight_itile0_otile0_kij1.txt";
+     2: w_file_name = "../datafiles/weight_itile0_otile0_kij2.txt";
+     3: w_file_name = "../datafiles/weight_itile0_otile0_kij3.txt";
+     4: w_file_name = "../datafiles/weight_itile0_otile0_kij4.txt";
+     5: w_file_name = "../datafiles/weight_itile0_otile0_kij5.txt";
+     6: w_file_name = "../datafiles/weight_itile0_otile0_kij6.txt";
+     7: w_file_name = "../datafiles/weight_itile0_otile0_kij7.txt";
+     8: w_file_name = "../datafiles/weight_itile0_otile0_kij8.txt";
     endcase
     
 
     w_file = $fopen(w_file_name, "r");
+    if (w_file == 0) begin
+      $display("ERROR: failed to open file: %s", w_file_name);
+      $finish;
+    end
     // Following three lines are to remove the first three comment lines of the file
     w_scan_file = $fscanf(w_file,"%s", captured_data);
     w_scan_file = $fscanf(w_file,"%s", captured_data);
@@ -199,10 +216,6 @@ initial begin
     #0.5 clk = 1'b1; 
     /////////////////////////////////////
 
-  // SRAM to L0
-  // SRAM data => L0 in
-  // |   |   |      |
-// A_x CEN  WEN    l0_wr
  
     /////// Kernel data writing to L0 ///////
     // prime SRAM and delay by a cycle, wr first addr to sram
@@ -225,12 +238,6 @@ initial begin
       #0.5 clk = 1'b1;
     end
 
-    // // iteration v3
-    // // load in 0x407
-    // #0.5 clk = 1'b0;
-    // l0_wr = 1;
-    // CEN_xmem = 1; // turn off SRAM but get its last output
-    // #0.5 clk = 1'b1;
 
     // full l0 off
     #0.5 clk = 1'b0;
@@ -238,32 +245,24 @@ initial begin
     l0_wr = 0;
     #0.5 clk = 1'b1;
 
-    // itervation v2
-    // // turn off L0
-    // #0.5 clk = 1'b0;
-    // l0_wr = 0;
-    // CEN_xmem = 1;
-    // WEN_xmem = 1;
-    // #0.5 clk = 1'b1;
-
-  //   for (t=0; t<col; t=t+1) begin
-  //   	#0.5 clk = 1'b0 CEN_xmem = 0; WEN_xmem = 1; A_xmem = 11'b10000000000 + t[10:0]; l0_wr = 1;
-	// #0.5 clk = 1'b1;
-  //   end
-
-  //   #0.5 clk = 1'b0; l0_wr = 0; CEN_xmem = 1; WEN_xmem = 1;
-  //   #0.5 clk = 1'b1;
-    /////////////////////////////////////
+       /////////////////////////////////////
 
 
 
     /////// Kernel loading to PEs ///////
     // 4bits change at a time with l0
     // skew shift in row+col len_kij loop for skewed inputs
-    for (t=0; t<col+row; t=t+1) begin
-      #0.5 clk = 1'b0; load = 1; l0_rd = 1;
-      #0.5 clk = 1'b1;
-    end
+    
+    
+      for (t=0; t<row; t=t+1) begin
+         #0.5 clk = 1'b0; load = 1; l0_rd = 1;
+         #0.5 clk = 1'b1;
+      end
+
+      for (t=0; t<col; t=t+1) begin
+      	 #0.5 clk = 1'b0; load = 1; l0_rd = 0;
+	 #0.5 clk = 1'b1;
+      end
 
     #0.5 clk = 1'b0; load = 0; l0_rd = 0;
     #0.5 clk = 1'b1;
@@ -314,19 +313,6 @@ initial begin
     WEN_xmem = 1;
     #0.5 clk = 1'b1;
 
-  //   for (t=0; t<len_nij; t=t+1) begin
-  //   	#0.5 clk = 1'b0; CEN_xmem = 0; WEN_xmem = 1; l0_wr = 1;
-	// #0.5 clk = 1'b1; A_xmem = A_xmem + 1;
-  //   end
-
-  //   #0.5 clk = 1'b0; l0_wr = 0; CEN_xmem = 1; WEN_xmem = 1;
-  //   #0.5 clk = 1'b1;
-    /////////////////////////////////////
-
-  // #0.5 clk = 1'b0;
-  // l0_rd = 1;
-  // execute = 0;
-  // #0.5 clk = 1'b1;
 
     /////// Execution /////// ~36 cycles
     for (t=0; t<row+col+len_nij; t=t+1) begin // stream inputs in (pipeline) + row+col (prop across array)
@@ -341,93 +327,73 @@ initial begin
 
 
 
-  // 201 ps at this point
-    // sfp_out should write to PMEM each 1 cycle
-    // (some repeats take 2 cycles) ?
+  	#0.5 clk = 1'b0;
+	acc = 0;              	// don't accumulate yet
+	ofifo_rd = 1;         	// read next PSUM, output to psum_in for SFU
+	bypass = 1;           	// avoid acc + ReLU, just store raw PSUM result
+	CEN_pmem = 0;
+	WEN_pmem = 0;
 
+	t=0;
 
-  //   ////// OFIFO READ ////////
-  //   Ideally, OFIFO should be read while execution, but we have enough ofifo
-  //   depth so we can fetch out after execution.
-  // read out to and accum in sfu 16 times
-    // wait 1 clk cycle for valid out
-    // #0.5 clk = 1'b0;
-    // acc = 0;
-    // ofifo_rd = 1;
-    // #0.5 clk = 1'b1;
-    $display("\n===== PMEM Storage =====");
-    #0.5 clk = 1'b0;
-    acc = 0;                  // don't accumulate yet
-    ofifo_rd = 1;             // read next PSUM, output to psum_in for SFU
-    // CEN_pmem = 0;             // enable PMEM
-    // WEN_pmem = 0;             // enable write on PMEM
-    A_pmem = kij * len_onij;  // get starting address (i.e. kij=0 -> 0, kij=1 -> 16, kij=2 -> 32, etc.)
-    bypass = 1;               // avoid acc + ReLU, just store raw PSUM result
-    #0.5 clk = 1'b1;
-    #0.5 clk = 1'b0;          // extra cycle to avoid reading in invalid or stale sfp_out value
-    #0.5 clk = 1'b1;
-    t=0;
-    // skip first value (duplicate)
-    while (t < len_onij + 1) begin // 2 cycle delay
-      #0.5 clk = 1'b0; 
-      if (ofifo_valid) begin
-        ofifo_rd = 1;   // acc = 1;
-        if (t >= 1 && t < len_onij + 1) begin         // skip first value (duplicate)
-          CEN_pmem = 0;   // enable PMEM
-          WEN_pmem = 0;   // enable write on PMEM
-          if ( t > 1 ) A_pmem = A_pmem + 1;
-        end
-        if (ofifo_valid && CEN_pmem == 0) begin
-        $display("[KIJ=%0d, t=%0d] Writing to PMEM[%0d], sfp_out=%h", 
-                kij, t, A_pmem, sfp_out);
-        end
-        t = t + 1;
-      end
-      else begin
-        ofifo_rd = 0;
-        CEN_pmem = 1;
-        WEN_pmem = 1;
-        // acc = 0;
-      end
-      #0.5 clk = 1'b1;
-    end
+	#0.5 clk = 1'b1;
 
-    #0.5 clk = 1'b0;
-    ofifo_rd = 0;
-    acc = 0;
-    CEN_pmem = 1;     // disable PMEM
-    WEN_pmem = 1;     // disable write on PMEM
-    bypass = 0;       // remove bypass signal
-    #0.5 clk = 1'b1;
+	while (t < len_nij) begin
+		#0.5 clk = 1'b0;
+    		if (ofifo_valid) begin
+ 		
+    			if (t >= 0 && t < len_nij) begin     
 
-    /////////////////////////////////////
+      				if ( t >= 0 ) begin
+   	 				A_pmem = (kij * 36) + t;
+      				end
+    			end
+    			t = t + 1;
+  		end
+  		else begin
+    			ofifo_rd = 0;
+    			CEN_pmem = 1;
+    			WEN_pmem = 1;
+  		end
+  		#0.5 clk = 1'b1;
+	end
+
+	#0.5 clk = 1'b0;
+	ofifo_rd = 0;
+	acc = 0;
+	CEN_pmem = 1; 	// disable PMEM
+	WEN_pmem = 1; 	// disable write on PMEM
+	bypass = 0;   	// remove bypass signal
+	#0.5 clk = 1'b1;
+
+	/////////////////////////////////////
 
   end  // end of kij loop
+ 
 
-
-
-
-  // After OFIFO Read section, before accumulation
-  $display("\n========== PMEM Contents Before Accumulation ==========");
-  for (k=0; k<144; k=k+1) begin
+  // After OFIFO Read section, PMEM contents before accumulation
+  for (k=0; k<324; k=k+1) begin
     #0.5 clk = 1'b0; 
-    CEN_pmem = 0; WEN_pmem = 1; A_pmem = k; bypass = 0;
+    CEN_pmem = 0; A_pmem = k;
     #0.5 clk = 1'b1;
     #0.5 clk = 1'b0; #0.5 clk = 1'b1;
-    $display("PMEM[%3d] = %h", k, core_instance.pmem_q); // raw PSUM values in memory
+    #0.5 clk = 1'b0; #0.5 clk = 1'b1;
   end
-  $display("=======================================================\n");
-    
+      
 
 
-  // 1613 ns at this point
+
 
 
   ////////// Accumulation /////////
-  out_file = $fopen("out.txt", "r");  
-  acc_file = $fopen("acc.txt", "r");
+  out_file = $fopen("../datafiles/out.txt", "r");  
+  acc_file = $fopen("../datafiles/acc.txt", "r");
+  if (out_file == 0) begin
+    $display("ERROR: failed to open ../datafiles/out.txt");
+    $finish;
+  end
   if (acc_file == 0) begin
-    $display("ERROR: failed to open acc.txt");
+    $display("ERROR: failed to open ../datafiles/acc.txt");
     $finish;
   end else begin
     $display("Opened acc.txt correctly\n");
@@ -448,7 +414,7 @@ initial begin
 
 $display("############ Verification Start during accumulation #############"); 
 
-for (i=0; i<len_onij+1; i=i+1) begin    // 16 iterations
+for (i=0; i<len_onij+1; i=i+1) begin 
 
   #0.5 clk = 1'b0; 
   #0.5 clk = 1'b1; 
@@ -465,60 +431,43 @@ for (i=0; i<len_onij+1; i=i+1) begin    // 16 iterations
     end
   end
   
-  if (i < len_onij) begin
-    $display("\n===== Accumulating Output Position %2d =====", i);
-    $display("Initial state: bypass=%b, acc=%b", bypass, acc);
-  end
-
+ 
   #0.5 clk = 1'b0; reset = 1;
   #0.5 clk = 1'b1;  
-  $display("After reset: accumulator cleared");
   
   #0.5 clk = 1'b0; reset = 0; 
   #0.5 clk = 1'b1;  
 
-  for (j=0; j<len_kij+1; j=j+1) begin 
+  for (j=0; j<len_kij; j=j+1) begin 
+      acc_scan_file = $fscanf(acc_file,"%11b", A_pmem); 
 
-    #0.5 clk = 1'b0;   
+      #0.5 clk = 1'b0;   
       if (j<len_kij) begin 
         CEN_pmem = 0; 
         WEN_pmem = 1; 
-        acc_scan_file = $fscanf(acc_file,"%11b", A_pmem); 
         bypass = 0;
-        $display("  j=%2d: Setting up PMEM read, A_pmem=%3d, bypass=%b", j, A_pmem, bypass);
+   
       end
       else begin 
         CEN_pmem = 1; 
         WEN_pmem = 1; 
       end
 
-      if (j>0) acc = 1;  
-      
+      if (j>=0) begin
+	 acc = 1;  
+      end
     #0.5 clk = 1'b1;
-    
-    // After clock edge, check what happened
-    if (j > 0 && j <= len_kij) begin
-      $display("  j=%2d: After clk, A_pmem_q=%3d, pmem_q=%h, bypass_q=%b, acc_q=%b", 
-               j, A_pmem_q, core_instance.pmem_q, bypass_q, acc_q);
-      $display("        Accumulator[0]=%h, Accumulator[1]=%h", 
-               core_instance.corelet_inst.sfu_inst.accumulator[0],
-               core_instance.corelet_inst.sfu_inst.accumulator[1]);
-    end
+
   end
 
-  $display("  Setting acc=0 to trigger ReLU...");
+  
   #0.5 clk = 1'b0; acc = 0;
   #0.5 clk = 1'b1; 
 
   #0.5 clk = 1'b0;
   #0.5 clk = 1'b1;
   
-  if (i < len_onij) begin
-    $display("  → After ReLU: sfp_out = %h", sfp_out);
-    $display("     sfp_out[15:0]  (ch0) = %h", sfp_out[15:0]);
-    $display("     sfp_out[31:16] (ch1) = %h", sfp_out[31:16]);
-  end
-end
+ end
 
 if (error == 0) begin
   $display("############ No error detected ##############"); 
@@ -564,7 +513,4 @@ end
 
 
 endmodule
-
-
-
 

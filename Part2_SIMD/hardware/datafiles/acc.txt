@@ -1,6 +1,3 @@
-#acc0:_addresses_of_psums_to_be_accumulated_per_output_window#
-#9_addresses_(for_kij_0..8)_per_(ni,nj)_output_position#
-#................#
 00000000000
 00000010000
 00000100000
